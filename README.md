@@ -1,87 +1,38 @@
-@Composable
-fun MyUI() {
-    val scaffoldState = rememberScaffoldState()
+    fun OptionMenu(){
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = { MyBottomBar() },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                // FAB onClick
-            }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
-            }
-        },
-        scaffoldState = scaffoldState,
-        isFloatingActionButtonDocked = true,
-        floatingActionButtonPosition = FabPosition.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues = it),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // rest of the app's UI
-        }
-    }
-}
+    var showMenu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-@Composable
-fun MyBottomBar() {
-    // items list
-    val bottomMenuItemsList = prepareBottomMenu()
+    TopAppBar(
+        title = { Text("My AppBar") },
+        actions = {
 
-    val contextForToast = LocalContext.current.applicationContext
-
-    var selectedItem by remember {
-        mutableStateOf("Home")
-    }
-
-    BottomAppBar(
-        cutoutShape = CircleShape
-    ) {
-        bottomMenuItemsList.forEachIndexed { index, menuItem ->
-            if (index == 1) {
-                // add an empty space for FAB
-                BottomNavigationItem(
-                    selected = false,
-                    onClick = {},
-                    icon = {},
-                    enabled = false
-                )
+            IconButton(onClick = { Toast.makeText(context, "Favorite", Toast.LENGTH_SHORT).show() }) {
+                Icon(Icons.Default.Favorite, "")
             }
 
-            BottomNavigationItem(
-                selected = (selectedItem == menuItem.label),
-                onClick = {
-                    selectedItem = menuItem.label
-                    Toast.makeText(
-                        contextForToast,
-                        menuItem.label, Toast.LENGTH_SHORT
-                    ).show()
-                },
-                icon = {
-                    Icon(
-                        imageVector = menuItem.icon,
-                        contentDescription = menuItem.label
-                    )
-                },
-                enabled = true
-            )
+            IconButton(onClick = { showMenu = !showMenu }) {
+                Icon(Icons.Default.MoreVert, "")
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+
+                DropdownMenuItem(onClick = { Toast.makeText(context, "Settings", Toast.LENGTH_SHORT).show() }) {
+                    Text(text = "Settings")
+                }
+
+                DropdownMenuItem(onClick = { Toast.makeText(context, "Logout", Toast.LENGTH_SHORT).show() }) {
+                    Text(text = "Logout")
+                }
+
+            }
+
+
         }
-    }
+    )
+
+
 }
-
-private fun prepareBottomMenu(): List<BottomMenuItem> {
-    val bottomMenuItemsList = arrayListOf<BottomMenuItem>()
-
-    // add menu items
-    bottomMenuItemsList.add(BottomMenuItem(label = "Home", icon = Icons.Filled.Home))
-    bottomMenuItemsList.add(BottomMenuItem(label = "Profile", icon = Icons.Filled.Person))
-
-    return bottomMenuItemsList
-}
-
-data class BottomMenuItem(val label: String, val icon: ImageVector)
