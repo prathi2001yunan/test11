@@ -1,10 +1,13 @@
 package com.component_demo.ui.theme.component
-
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
@@ -38,25 +42,38 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.component_demo.R
+import com.example.simple.ui.theme.SimpleTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            QualificationForm()
+
+        }
+    }
+}
+
 @Composable
 fun QualificationForm() {
-    var expand by rememberSaveable {
-        mutableStateOf(false)
-    }
     Scaffold(topBar = {
         QualificationFormTopBar()
     }, bottomBar = {
@@ -72,15 +89,19 @@ fun QualificationForm() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Text(text = "Training & education", style = MaterialTheme.typography.headlineLarge  ,color = MaterialTheme.colorScheme.onPrimary)
+                Text(
+                    text = "Training & education",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Please enter your qualification details",
-                     style = MaterialTheme.typography.displaySmall,
+                    style = MaterialTheme.typography.displaySmall,
                     color = Color(0xFFB6B2B2)
                 )
                 Spacer(modifier = Modifier.height(40.dp))
-                ExposedDropdownMenuBoxItemComponenet(expanded = expand , onExpandedChange = { expand =! expand })
+                ExposedDropdownMenu(false)
                 Spacer(modifier = Modifier.height(15.dp))
                 TextFieldComponent(
                     text = "Field of study",
@@ -107,9 +128,10 @@ fun QualificationForm() {
                     color = Color(0xFFF3F3F3)
                 )
             }
+            }
         }
     }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +145,7 @@ fun QualificationFormTopBar() {
             Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.image_1),
+                painter = painterResource(id = R.drawable.ic_launcher_background),
                 contentDescription = "",
                 modifier = Modifier.size(70.dp)
             )
@@ -131,7 +153,8 @@ fun QualificationFormTopBar() {
     }, actions = {
         TextButton(onClick = { /* do something */ }) {
             Text("CANCEL", style = MaterialTheme.typography.displayMedium , color = MaterialTheme.colorScheme.primary)
-        }}, colors = TopAppBarDefaults.largeTopAppBarColors(MaterialTheme.colorScheme.background))
+        }
+    }, colors = TopAppBarDefaults.largeTopAppBarColors(MaterialTheme.colorScheme.background))
 }
 
 
@@ -188,70 +211,114 @@ fun TextFieldComponent(
             )
         },
         singleLine = true,
-        )
+    )
 }
 
 @Composable
 fun BoxComponent() {
- Box(modifier = Modifier
-     .height(30.dp)
-     .width(20.dp)
-     .clip(RoundedCornerShape(10.dp))
-     .background(
-         Color.Red,
-         RoundedCornerShape(10.dp)
-     )) {
+    Box(modifier = Modifier
+        .height(30.dp)
+        .width(20.dp)
+        .clip(RoundedCornerShape(10.dp))
+        .background(
+            Color.Red,
+            RoundedCornerShape(10.dp)
+        )) {
 
- }
+    }
 }
 
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExposedDropdownMenuBoxItemComponeet(
-    expanded: Boolean,
-    onExpandedChange: () -> Unit,
-    withBorder: Boolean = false
-) {
-    // text field
-    var selectedItem by rememberSaveable {
+fun ExposedDropdownMenu(withBorder: Boolean = false) {
+
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
+    var selectedItem by remember {
         mutableStateOf("")
     }
-    TextField(value = selectedItem,
-        onValueChange = {selectedItem = it},
-        modifier = Modifier
-            .fillMaxWidth()
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { newValue ->
+           expanded = newValue
+        },
+        modifier = Modifier.fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .height(60.dp)
-            .clip(RoundedCornerShape(5.dp))
-            .border(
-                2.dp,
-                if (withBorder) Color(0xFFD1CCCC) else Color.Transparent,
-                RoundedCornerShape(5.dp)
+    ) {
+        TextField(
+            value = selectedItem,
+            onValueChange = { },
+            modifier = Modifier.fillMaxWidth()
+                .height(60.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .border(
+                    2.dp,
+                    Color.Transparent,
+                    RoundedCornerShape(5.dp)
+                )
+                .menuAnchor(),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color(
+                    0xFFF3F3F3
+                ),
+                focusedIndicatorColor = Color(0xFFF1F0FF),
+                unfocusedIndicatorColor = Color(0xFFF1F0FF)
             ),
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(
-                0xFFF3F3F3
-            ),
-            focusedIndicatorColor = Color(0xFFF1F0FF),
-            unfocusedIndicatorColor = Color(0xFFF1F0FF)
-        ),
-        placeholder = {
-            Text(
-                text = "Degree / diploma / certificate", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.W600,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+            placeholder = {
+                Text(
+                    text = "Degree / diploma / certificate",
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.W600,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+
+            },
+            readOnly = true,
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None)
             )
-        },
-        trailingIcon = {
-           IconButton(onClick = { onExpandedChange() }) {
-               Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "" )
-           }
-        },
-        singleLine = true,
-        readOnly = true
-    )
-    val listItems = listOf<String>("Degree","diploma","certificate")
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {onExpandedChange()}) {
-        listItems.forEach { selectedOption ->
-            DropdownMenuItem(text =  { Text(text = selectedOption)} , onClick = { selectedItem = selectedOption })
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+            },
+            modifier = Modifier.fillMaxWidth()) {
+            DropdownMenuItem(
+                text = {
+                    Text(text = "Degree")
+                },
+                onClick = {
+                    selectedItem = "Degree"
+                    expanded = false
+                }
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(text = "diploma")
+                },
+                onClick = {
+                    selectedItem = "diploma"
+                    expanded = false
+                }
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(text = "certificate")
+                },
+                onClick = {
+                    selectedItem = "certificate"
+                    expanded = false
+                }
+            )
         }
     }
 }
+
